@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yandex-lavka-mcp"
+version = "0.1.0"
+description = "MCP server for Yandex Lavka Uzbekistan"
+license = "GPL-3.0-only"
+requires-python = ">=3.12"
+dependencies = [
+  "mcp>=1.9,<2",
+  "httpx>=0.27,<1",
+  "qrcode[pil]>=8,<9",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10", "pytest-asyncio>=0.24,<2"]
+
+[project.scripts]
+yandex-lavka-mcp = "lavka_uz:mcp.run"
+
+[tool.setuptools]
+py-modules = [
+  "lavka_cancel",
+  "lavka_cart",
+  "lavka_checkout",
+  "lavka_errors",
+  "lavka_live_transport",
+  "lavka_order_mcp",
+  "lavka_order_observation",
+  "lavka_payment",
+  "lavka_rejection_capture",
+  "lavka_submit_payload",
+  "lavka_tracking_projection",
+  "lavka_uz",
+  "qr_auth",
+  "qr_mcp",
+  "qr_runtime",
+]
