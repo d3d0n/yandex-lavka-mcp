@@ -2,7 +2,7 @@
 
 **A local MCP server for exploring and managing a Yandex Lavka Uzbekistan cart—with explicit controls around consequential writes.**
 
-Unofficial · Uzbekistan only · Python · stdio
+Unofficial · Uzbekistan ordering; RU/KZ anonymous search · Python · stdio
 
 > [!WARNING]
 > This server can modify a real cart, submit a paid order, and request cancellation. Its order and cancellation MCP paths are tested with mocked upstream responses, **not a new live MCP transaction**. Official-site transactions were observed separately; they do not prove this implementation works end to end. Use only with trusted clients, review every consequential action, and never retry an uncertain write blindly.
@@ -13,13 +13,23 @@ Connect a local MCP client, then ask it to search for products at a location in 
 
 | Capability | Tools | Boundary |
 |---|---|---|
-| Discover | `service_status`, `suggest_address`, `search_products` | Homepage status and suggestions do not establish address coverage. Search accepts coordinates; the upstream may require them. |
+| Discover | `select_region`, `delivery_location`, `detect_delivery_location`, `service_status`, `suggest_address`, `search_products` | `select_region`, `service_status` and `search_products` accept explicit RU/KZ/UZ; other discovery tools remain UZ-only. Homepage status and suggestions do not establish address coverage. |
 | Sign in | `login_start`, `qr_login_status`, `qr_login_cancel` | Private, short-lived QR login; see [authentication](docs/auth.md). |
 | Cart | `get_cart`, `set_cart_item`, `checkout_preview` | Coordinates are longitude, latitude; a cart quote does not select an address or card. `set_cart_item` is a real write. |
 | Account and orders | `saved_address_count`, `saved_addresses`, `saved_cards`, `active_orders`, `order_history` | Address details and order identifiers are private. Active tracking is not history. |
 | Checkout | `order_preview`, `submit_order`, `reconcile_checkout`, `cancel_order` | Explicit confirmation and careful reconciliation are essential; see [checkout](docs/checkout.md). |
 
 Prices, availability and delivery charges change. The server uses undocumented web APIs that may change or reject requests, and it is not affiliated with Yandex. Country-level currency confirmation does not prove coverage at an individual address.
+
+## Country and delivery location
+
+Choose a startup country when adding the MCP server by setting `YANDEX_LAVKA_REGION` to `UZ`, `RU`, or `KZ`; if omitted it defaults to `UZ`. Any other value prevents startup. See [client setup](docs/clients.md) for configuration examples. At any time call `select_region(country="RU")` (or `KZ` or `UZ`) to change the default for `service_status` and `search_products`. Selection is in memory for this stdio server process only; it is not written to a shared file and resets to the configured startup value when restarted. Use a separate server process per client session; this is not per-client isolation for a shared multi-client server.
+
+`service_status(country="RU")` and `search_products(country="KZ", longitude=..., latitude=...)` explicitly override the selected country for that read only, without changing the selection. RU/KZ reads use fresh anonymous country-specific sessions and confirm currency. Login, address suggestions, location helpers, cart, payments and checkout are UZ-only and are refused while RU/KZ is selected. A region change is rejected while a UZ tool is in flight; retry after it completes, especially for an order with an uncertain outcome. Switching itself places no order. No country is inferred from IP or device geolocation.
+
+For a delivery location, call `delivery_location(country="UZ", longitude=..., latitude=...)`, or use `detect_delivery_location(country="UZ")` with an authenticated session. Detection returns candidate coordinates only when exactly one favorite exists; zero or multiple favorites require an explicit choice. For multiple favorites, review `saved_addresses` and pass its freshly obtained `address_index` to `detect_delivery_location`. Alternatively, use `suggest_address` and choose an address with usable coordinates. Indexes can change and similar favorites may differ in apartment details; verify the exact address before checkout.
+
+These tools are stateless: changing location means passing the new coordinates to **each** search, cart and quote call. They do not update the account's address, select a checkout address, or persist a default. Refresh search and cart after a change; old prices and carts may be stale and cart identity may be shared across locations. Review the exact saved address again in `order_preview`. The bounding box is only a coarse input check, not proof that the coordinates lie in Uzbekistan or that delivery is available. Coordinates and saved addresses are private; use a trusted client and beware client logs.
 
 ## Get started
 

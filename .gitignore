@@ -33,6 +33,7 @@
 !/lavka_submit_payload.py
 !/lavka_tracking_projection.py
 !/lavka_uz.py
+!/regional_storefront.py
 !/qr_auth.py
 !/qr_mcp.py
 !/qr_runtime.py
@@ -67,6 +68,10 @@
 !/tests/test_rejection_capture.py
 !/tests/test_rejection_shapes.py
 !/tests/test_saved_addresses.py
+!/tests/test_region_selection.py
+!/tests/test_region_state.py
+!/tests/test_regional_routing.py
+!/tests/test_regional_storefront.py
 !/tests/test_service_fee_mapping.py
 !/tests/test_submit_diagnostics.py
 !/tests/test_submit_payload.py

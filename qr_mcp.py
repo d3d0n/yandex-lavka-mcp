@@ -84,12 +84,15 @@ class QRLogin:
             return {'status': 'cancelled'}
 
 
-def register_qr_tools(mcp, session_path):
+def register_qr_tools(mcp, session_path, guard=None):
     """Register once on a trusted, local stdio server; QR file is owner-only."""
     from http.cookiejar import Cookie
     import json
     import httpx
     from qr_runtime import QRManager
+
+    if guard is None:
+        guard = lambda fn: fn
 
     session = Path(session_path).expanduser()
     session.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -112,6 +115,7 @@ def register_qr_tools(mcp, session_path):
     login = QRLogin(session, manager, verify)
 
     @mcp.tool()
+    @guard
     async def login_start(replace_existing: bool = False):
         """Start login and return a QR image plus its short-lived link. Share only with the intended user; client logs may contain the link. Set replace_existing only with approval."""
         from mcp.types import TextContent, ImageContent
@@ -129,13 +133,14 @@ def register_qr_tools(mcp, session_path):
         return content
 
     @mcp.tool()
+    @guard
     async def qr_login_status() -> dict:
         """Poll QR login and verify Lavka session; never reveals credentials."""
         return await login.status()
 
     @mcp.tool()
     async def qr_login_cancel() -> dict:
-        """Cancel pending login and delete its QR image."""
+        """Cancel pending login and delete its QR image, regardless of selected region."""
         return await login.cancel()
 
     return login

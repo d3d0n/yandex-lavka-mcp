@@ -6,6 +6,8 @@ The server speaks MCP over **stdio**: the client starts a local process and comm
 
 Replace `/absolute/path/to/repository` in the examples with the absolute path to your checkout. The virtualenv Python and `lavka_uz.py` must exist there; the examples target Unix-like systems. Merge the server entry into any existing configuration rather than overwriting other settings. Review project-level configurations before sharing them: absolute paths are machine-specific, and MCP servers can execute local programs.
 
+Choose the initial country by adding `"env": {"YANDEX_LAVKA_REGION": "KZ"}` to the server entry (Oh My Pi, Claude Code and Claude Desktop), or `"environment": {"YANDEX_LAVKA_REGION": "KZ"}` for OpenCode. Use exactly `UZ`, `RU`, or `KZ`; omission defaults to `UZ`, and invalid values prevent startup. After connecting, call `select_region` to change the country for this server process. A restart restores the configured startup country. RU/KZ support anonymous status and search only; UZ account, login start/status, cart and order tools are blocked when those regions are selected. `qr_login_cancel` remains available in every region to clean up a pending UZ login. An in-flight UZ operation must finish before switching. See [country and delivery location](../README.md#country-and-delivery-location).
+
 ### Oh My Pi
 
 Add this to `.omp/mcp.json` in the project where you run Oh My Pi, or to `~/.omp/agent/mcp.json` for the default user profile. Other profiles and configuration directory overrides use different paths; see the [Oh My Pi MCP configuration guide](https://github.com/can1357/oh-my-pi/blob/main/docs/mcp-config.md).
